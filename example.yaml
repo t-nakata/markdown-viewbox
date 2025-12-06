@@ -1,0 +1,37 @@
+screen: Mobile
+title: "App with Navigation"
+root:
+  type: Scaffold
+  appBar:
+    title: "My Dashboard"
+  bottomNavigation:
+    type: BottomNavigation
+    items:
+      - label: "Home"
+        active: true
+      - label: "Search"
+      - label: "Profile"
+  floatingActionButton:
+    type: FloatingActionButton
+    icon: "+"
+  body:
+    type: Container
+    padding: 16
+    gap: 16
+    children:
+      - type: Text
+        text: "Recent Activity"
+        size: 20
+        weight: bold
+      
+      - type: Container
+        color: "#F5F5F5"
+        height: 100
+        children:
+            - type: Text
+              text: "Card Content"
+              padding: 10
+
+      - type: Button
+        text: "Refresh"
+        variant: secondary

@@ -1,0 +1,19 @@
+{
+  "name": "markdown-viewbox",
+  "version": "1.0.0",
+  "description": "Markdownで描く、画面デザインのブループリント。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.10.1",
+    "js-yaml": "^4.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
