@@ -2,3 +2,4 @@ node_modules
 dist
 *.svg
 .DS_Store
+service-account.json
