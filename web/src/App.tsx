@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { parse } from './lib/viewbox/parser'
 import { render } from './lib/viewbox/renderer'
-import { Download, Image as ImageIcon, FileCode, Edit2, X, Plus } from 'lucide-react'
+import { Image as ImageIcon, FileCode, X } from 'lucide-react'
 import { load, dump } from 'js-yaml'
 import './index.css'
 
@@ -152,23 +152,25 @@ function App() {
             if (!current) break;
 
             if (Array.isArray(current)) {
+                // Ensure part is treated as index if possible
                 const index = parseInt(part);
                 if (!isNaN(index)) {
-                    current = current[index];
+                    // Cast to any to avoid implicit any if type isn't known
+                    current = (current as any)[index];
                     pathStack.push(index);
                 } else {
-                    current = current[part];
+                    current = (current as any)[part];
                     pathStack.push(part);
                 }
             } else if (typeof current === 'object') {
                 const keys = Object.keys(current);
                 // Heuristic: Auto-enter component wrapper if encountered
                 if (keys.length === 1 && /^[A-Z]/.test(keys[0]) && COMPONENT_SCHEMAS[keys[0]]) {
-                    current = current[keys[0]];
+                    current = (current as any)[keys[0]];
                     pathStack.push(keys[0]);
                 }
 
-                current = current[part];
+                current = (current as any)[part];
                 pathStack.push(part);
             }
         }
@@ -227,7 +229,7 @@ function App() {
             doc = load(yaml);
         } catch (e) { return; }
 
-        const { target, fullPath } = resolveYamlPath(doc, selectedPath);
+        const { target } = resolveYamlPath(doc, selectedPath);
         console.log('Update target:', target);
 
         if (!target || typeof target !== 'object') {

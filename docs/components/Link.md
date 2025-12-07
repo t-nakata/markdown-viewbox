@@ -15,7 +15,9 @@
 ## 使用例
 
 ```yaml
-type: Link
-text: "利用規約を見る"
-size: 14
+Link:
+  text: "利用規約"
+  url: "https://example.com/terms"
+  size: 14
+  color: "#1E88E5"
 ```

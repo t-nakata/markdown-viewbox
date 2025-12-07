@@ -27,8 +27,8 @@ Material Design アイコンを表示します。
 ## 使用例
 
 ```yaml
-type: Icon
-name: "settings"
-size: 32
-color: "#666666"
+Icon:
+  name: "home"
+  size: 32
+  color: "#6200EE"
 ```

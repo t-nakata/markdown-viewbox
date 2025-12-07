@@ -16,11 +16,11 @@
 
 ### 画像指定あり（角丸）
 ```yaml
-type: Image
-src: "https://via.placeholder.com/300"
-width: 300
-height: 200
-radius: 12
+Image:
+  src: "https://example.com/photo.jpg"
+  width: 300
+  height: 200
+  radius: 8
 ```
 
 ### プレースホルダーとして使用

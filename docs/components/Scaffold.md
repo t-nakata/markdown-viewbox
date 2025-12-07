@@ -27,25 +27,29 @@ Material Design の Scaffold に倣い、AppBar、Body、BottomNavigation、Floa
 ## 使用例
 
 ```yaml
-type: Scaffold
-appBar:
-  title: "詳細画面"
-  backButton: true
-  centerTitle: true
-  backgroundColor: "#1976D2"
-body:
-  type: Container
-  children:
-    - type: Text
-      text: "メインコンテンツ"
-bottomNavigation:
-  type: BottomNavigation
-  children:
-    - type: BottomNavigationItem
-      label: "Home"
-      icon: "home"
-      active: true
-floatingActionButton:
-  type: FloatingActionButton
-  icon: "add"
+Scaffold:
+  appBar:
+    title: "詳細画面"
+    backButton: true
+    centerTitle: true
+    backgroundColor: "#1976D2"
+  
+  body:
+    Column:
+      children:
+        - Text:
+            text: "メインコンテンツ"
+  
+  bottomNavigation:
+    children:
+      - BottomNavigationItem:
+          label: "Home"
+          icon: "home"
+          active: true
+      - BottomNavigationItem:
+          label: "検索"
+          icon: "search"
+  
+  floatingActionButton:
+    icon: "add"
 ```

@@ -16,15 +16,17 @@
 
 ### ラベルと値（入力済み状態）
 ```yaml
-type: EditText
-label: "メールアドレス"
-value: "user@example.com"
+EditText:
+  label: "メールアドレス"
+  placeholder: "example@example.com"
+  value: ""
+  borderColor: "#CCCCCC"
 ```
 
 ### プレースホルダーのみ
 ```yaml
-type: EditText
-placeholder: "検索キーワードを入力..."
+EditText:
+  placeholder: "検索キーワードを入力..."
 ```
 
 ### 組み合わせ

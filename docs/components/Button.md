@@ -19,18 +19,23 @@
 
 ### 標準ボタン
 ```yaml
-type: Button
-text: "送信"
-variant: "primary"
-```
+# Primary Button
+Button:
+  text: "送信"
+  variant: "primary"
+  width: 200
 
-### カスタムスタイルボタン
-```yaml
-type: Button
-text: "キャンセル"
-variant: "outline"
-borderColor: "#FF0000"
-textColor: "#FF0000"
-radius: 20
-width: 200
+# Outline Button
+Button:
+  text: "キャンセル"
+  variant: "outline"
+  borderColor: "#FF0000"
+  textColor: "#FF0000"
+
+# Custom Button
+Button:
+  text: "カスタム"
+  backgroundColor: "#000000"
+  textColor: "#FFFFFF"
+  radius: 8
 ```

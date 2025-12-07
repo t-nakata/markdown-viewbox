@@ -1,4 +1,4 @@
-import { ViewElement, ViewBoxRoot, ScreenConfig, BaseElement } from './types';
+import { ViewElement, ViewBoxRoot, ScreenConfig } from './types';
 
 interface LayoutNode {
     element: ViewElement;
@@ -30,11 +30,11 @@ const MD_COLORS = {
     link: '#1E88E5'
 };
 
-const MD_SHADOWS = {
-    elevation2: 'filter="url(#shadow-2)"',
-    elevation4: 'filter="url(#shadow-4)"',
-    elevation8: 'filter="url(#shadow-8)"'
-};
+// const MD_SHADOWS = {
+//     elevation2: 'filter="url(#shadow-2)"',
+//     elevation4: 'filter="url(#shadow-4)"',
+//     elevation8: 'filter="url(#shadow-8)"'
+// };
 
 const DEFAULT_FONT_SIZE = 16;
 const LINE_HEIGHT = 1.5;
@@ -57,7 +57,7 @@ function getIconPath(name: string): string {
     return ICON_PATHS[name] || '';
 }
 
-function measureText(text: string, size: number = DEFAULT_FONT_SIZE, weight: string = 'normal', maxWidth: number = 1000): { width: number, height: number, lines: string[] } {
+function measureText(text: string, size: number = DEFAULT_FONT_SIZE, _weight: string = 'normal', maxWidth: number = 1000): { width: number, height: number, lines: string[] } {
     const charWidth = size * 0.6;
     const words = text.split(' ');
     let lines: string[] = [];

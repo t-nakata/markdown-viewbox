@@ -15,9 +15,9 @@
 ## 使用例
 
 ```yaml
-type: Text
-text: "Hello World"
-size: 24
-color: "#333333"
-weight: "bold"
+Text:
+  text: "Hello World"
+  size: 24
+  weight: "bold"
+  color: "#333333"
 ```

@@ -1,30 +1,46 @@
-# Container (Layout)
+# Layout Components
 
-要素を配置するための汎用的なコンテナです。
-現在は主に縦方向（Vertical）のレイアウトを行います。 `VBox`, `Column` と記述しても動作します。
+画面のレイアウトを構築するためのコンポーネント群です。
 
-## プロパティ
+## コンポーネントの種類
 
-| プロパティ名 | 型 | 説明 |
-| :--- | :--- | :--- |
-| `type` | `Container` / `VBox` / `Column` | コンポーネントタイプ。 |
-| `children` | List | 子要素のリスト。上から順に配置されます。 |
-| `padding` | number | コンテナ内部のパディング (px)。 |
-| `gap` | number | 子要素同士の間隔 (px)。 |
-| `color` | string | 背景色（例: `#F5F5F5`）。 |
-| `width` | number | 幅の指定。指定しない場合は親要素に合わせようとします。 |
-| `height` | number | 高さの指定。指定しない場合は内容に合わせて伸縮します。 |
+### Container
+単一の子要素をラップし、パディング、サイズ、背景色などを適用します。
+- `padding`: 内側の余白
+- `width` / `height`: 固定サイズ (省略時は子のサイズまたは親の制約に従う)
+- `color`: 背景色
+- `child`: **単一の子要素**
+
+### Column (Vertical)
+子要素を縦方向に並べます。
+- `gap`: 子要素間の間隔
+- `children`: **子要素のリスト**
+
+### Row (Horizontal)
+子要素を横方向に並べます。
+- `gap`: 子要素間の間隔
+- `children`: **子要素のリスト**
 
 ## 使用例
 
 ```yaml
-type: Container
-padding: 16
-gap: 8
-color: "#EEEEEE"
-children:
-  - type: Text
-    text: "Title"
-  - type: Text
-    text: "Description text..."
+# Column Layout
+Column:
+  gap: 16
+  children:
+    - Text:
+        text: "Header"
+    
+    # Container Wrapper
+    - Container:
+        padding: 24
+        color: "#E3F2FD"
+        child:
+          Row:
+            gap: 8
+            children:
+               - Icon:
+                   name: "check"
+               - Text:
+                   text: "Verified"
 ```

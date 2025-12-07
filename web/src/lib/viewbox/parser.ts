@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { ViewBoxRoot, ScreenConfig, ViewElement, ElementType } from './types';
+import { ViewBoxRoot, ElementType } from './types';
 
 export const SCREEN_PRESETS: Record<string, { width: number; height: number }> = {
     Web: { width: 1280, height: 800 },
@@ -119,7 +119,6 @@ export function parse(source: string): ViewBoxRoot {
     } else {
         // Try to find a component key at the top level
         // Exclude config keys like size, title, width, height
-        const keys = Object.keys(doc).filter(k => !['size', 'screen', 'title', 'width', 'height', 'config'].includes(k));
 
         // If we find exactly one component-like key, treat it as root
         // Or if we find a key that matches a Component Name, transform it.

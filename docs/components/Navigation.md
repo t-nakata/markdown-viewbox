@@ -45,20 +45,18 @@ BottomNavigation の子要素として使用します。
 ## 使用例 (Scaffold内での記述)
 
 ```yaml
-type: Scaffold
-# ...
-bottomNavigation:
-  type: BottomNavigation
-  children:
-    - type: BottomNavigationItem
-      label: "ホーム"
-      icon: "home"
-      active: true
-    - type: BottomNavigationItem
-      label: "検索"
-      icon: "search"
-
-floatingActionButton:
-  type: FloatingActionButton
-  icon: "add"
+Scaffold:
+  # ...
+  bottomNavigation:
+    children:
+      - BottomNavigationItem:
+          label: "ホーム"
+          icon: "home"
+          active: true
+      - BottomNavigationItem:
+          label: "検索"
+          icon: "search"
+  
+  floatingActionButton:
+    icon: "add"
 ```
