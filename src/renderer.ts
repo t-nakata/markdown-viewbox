@@ -21,9 +21,11 @@ const MD_COLORS = {
     onSurface: '#000000',
     textPrimary: 'rgba(0, 0, 0, 0.87)',
     textSecondary: 'rgba(0, 0, 0, 0.60)',
+    textHint: 'rgba(0, 0, 0, 0.38)',
     border: 'rgba(0, 0, 0, 0.12)',
     appBar: '#6200EE',
-    bottomNav: '#FFFFFF'
+    bottomNav: '#FFFFFF',
+    link: '#1E88E5'
 };
 
 const MD_SHADOWS = {
@@ -35,8 +37,27 @@ const MD_SHADOWS = {
 const DEFAULT_FONT_SIZE = 16;
 const LINE_HEIGHT = 1.5;
 
+// Minimal SVG Path Map for Icons
+const ICON_PATHS: Record<string, string> = {
+    home: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+    search: 'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+    add: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+    person: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+    settings: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.08-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
+    menu: 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',
+    arrow_back: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+    check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+    close: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 17.59 13.41 12z',
+    image: 'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'
+};
+
+function getIconPath(name: string): string {
+    return ICON_PATHS[name] || '';
+}
+
 function measureText(text: string, size: number = DEFAULT_FONT_SIZE, weight: string = 'normal'): { width: number, height: number } {
     const len = text.length;
+    // Estimate width more generously
     const w = len * (size * 0.6);
     return { width: w, height: size * LINE_HEIGHT };
 }
@@ -46,17 +67,18 @@ function calculateLayout(
     x: number,
     y: number,
     availableWidth: number,
-    availableHeight: number // Added context for Scaffold
+    availableHeight: number,
+    safeAreaBottom: number = 0
 ): LayoutNode {
     let width = 0;
     let height = 0;
     let childrenNodes: LayoutNode[] = [];
 
     const padding = element.padding || 0;
+    // const margin = element.margin || 0; // Not fully implemented in flow
     const gap = element.gap || 0;
     const contentWidth = availableWidth - (padding * 2);
 
-    // Layout Logic
     if (element.type === 'Scaffold') {
         width = availableWidth;
         height = availableHeight;
@@ -68,36 +90,51 @@ function calculateLayout(
             contentY += 56;
         }
 
-        // 2. BottomNavigation (Fixed at bottom)
+        // 2. BottomNavigation
         let contentBottom = y + height;
+
+        // BottomNav takes 72px + Safe Area Bottom.
+        const navContentHeight = 72;
+        const navFullHeight = navContentHeight + safeAreaBottom;
+
         if (scaffoldEl.bottomNavigation) {
-            contentBottom -= 56;
-            // Layout Bottom Nav
+            contentBottom -= navFullHeight;
+
+            const btmEl = scaffoldEl.bottomNavigation;
+            let navChildren: LayoutNode[] = [];
+
+            if (btmEl.children) {
+                const count = btmEl.children.length;
+                const itemWidth = width / count;
+
+                navChildren = btmEl.children.map((child: any, i: number) => {
+                    return calculateLayout(child, x + (i * itemWidth), contentBottom, itemWidth, navContentHeight, 0);
+                });
+            }
+
             childrenNodes.push({
                 element: scaffoldEl.bottomNavigation,
                 x: x,
                 y: contentBottom,
                 width: width,
-                height: 56
+                height: navFullHeight,
+                children: navChildren
             });
         }
 
         // 3. Body
         const bodyHeight = contentBottom - contentY;
         if (scaffoldEl.body) {
-            const bodyNode = calculateLayout(scaffoldEl.body, x, contentY, width, bodyHeight);
+            const bodyNode = calculateLayout(scaffoldEl.body, x, contentY, width, bodyHeight, 0);
             childrenNodes.push(bodyNode);
         }
 
-        // 4. FAB (Fixed absolute)
+        // 4. FAB
         if (scaffoldEl.floatingActionButton) {
-            // Bottom Right
             const fabSize = 56;
             const fabMargin = 16;
             const fabX = width - fabSize - fabMargin;
-            const fabY = contentBottom - fabSize - fabMargin - (scaffoldEl.bottomNavigation ? 0 : 0); // FAB usually above BottomNav or overlapping? Material guidelines: above snackbar, can overlap content.
-            // If bottom nav is present, usually FAB is above it
-            // Let's place it nicely.
+            const fabY = contentBottom - fabSize - fabMargin - (scaffoldEl.bottomNavigation ? 16 : 0);
 
             childrenNodes.push({
                 element: scaffoldEl.floatingActionButton,
@@ -115,7 +152,8 @@ function calculateLayout(
 
         if (element.children) {
             for (const child of element.children) {
-                const node = calculateLayout(child as ViewElement, currentX, currentY, contentWidth, 0); // unlimited height for children unless constrained
+                // Simple Vertical Layout
+                const node = calculateLayout(child as ViewElement, currentX, currentY, contentWidth, 0, 0);
                 childrenNodes.push(node);
                 currentY += node.height + gap;
                 maxWidth = Math.max(maxWidth, node.width);
@@ -124,14 +162,18 @@ function calculateLayout(
         }
 
         height = (currentY - y) + padding;
-        width = availableWidth;
+        width = availableWidth; // Take full width usually
 
         if (element.height) height = Number(element.height);
         if (element.width) width = Number(element.width);
 
-    } else if (element.type === 'Text') {
+    } else if (element.type === 'BottomNavigationItem') {
+        width = availableWidth;
+        height = availableHeight;
+
+    } else if (element.type === 'Text' || element.type === 'Link') {
         const textData = element as any;
-        const dims = measureText(textData.text, textData.size, textData.weight);
+        const dims = measureText(textData.text, textData.size || DEFAULT_FONT_SIZE);
         width = dims.width;
         height = dims.height;
 
@@ -140,22 +182,25 @@ function calculateLayout(
         const dims = measureText(btnData.text || 'Button', 14);
         width = Math.max(64, dims.width + 32);
         height = 36;
+        if (btnData.width) width = Number(btnData.width); // Allow override
+
     } else if (element.type === 'EditText' || element.type === 'Input') {
         width = contentWidth;
-        height = 56;
+        height = 56; // Standard Material Height
+    } else if (element.type === 'Icon') {
+        const iconEl = element as any;
+        width = iconEl.size || 24;
+        height = iconEl.size || 24;
+    } else if (element.type === 'Image') {
+        const imgEl = element as any;
+        width = imgEl.width ? Number(imgEl.width) : availableWidth; // Default to full width if not specified
+        height = imgEl.height ? Number(imgEl.height) : 200; // Default height placeholder
     } else {
         width = 100;
         height = 100;
     }
 
-    return {
-        element,
-        x,
-        y,
-        width,
-        height,
-        children: childrenNodes
-    };
+    return { element, x, y, width, height, children: childrenNodes };
 }
 
 function renderNodeToSVG(node: LayoutNode): string {
@@ -164,34 +209,36 @@ function renderNodeToSVG(node: LayoutNode): string {
 
     if (element.type === 'Scaffold') {
         const scaffoldEl = element as any;
-
-        // AppBar
         if (scaffoldEl.appBar) {
+            const bgColor = scaffoldEl.appBar.backgroundColor || MD_COLORS.appBar;
+
             svg += `<g filter="url(#shadow-4)">
-         <rect x="${x}" y="${y}" width="${width}" height="56" fill="${MD_COLORS.appBar}"/>
-         <text x="${x + 16}" y="${y + 35}" fill="#FFFFFF" font-family="'Roboto', sans-serif" font-size="20" font-weight="500">${scaffoldEl.appBar.title || ''}</text>
+         <rect x="${x}" y="${y}" width="${width}" height="56" fill="${bgColor}"/>`;
+
+            // Back Button
+            if (scaffoldEl.appBar.backButton) {
+                const iconPath = getIconPath('arrow_back');
+                svg += `<path transform="translate(${x + 16}, ${y + 16})" d="${iconPath}" fill="#FFFFFF"/>`;
+            }
+
+            // Title
+            const titleX = scaffoldEl.appBar.backButton ? x + 72 : x + 16;
+            const titleAlign = scaffoldEl.appBar.centerTitle ? 'middle' : 'start';
+            const finalTitleX = scaffoldEl.appBar.centerTitle ? x + width / 2 : titleX;
+
+            svg += `<text x="${finalTitleX}" y="${y + 35}" fill="#FFFFFF" font-family="'Roboto', sans-serif" font-size="20" font-weight="500" text-anchor="${titleAlign}">${scaffoldEl.appBar.title || ''}</text>
        </g>`;
         }
-
         if (node.children) {
-            // Render children (body, bottomNav, fab)
-            // Be careful with Z-order. Body first, then floating elements.
-            // Our layout array order is BottomNav, Body, FAB. 
-            // We should render Body, then BottomNav, then FAB to ensure z-index.
-            // Actually layout calculation pushed BottomNav first.. 
-            // Let's rely on array order but verify.
-
-            // Sort: Body -> BottomNav -> FAB
             const sorted = [...node.children].sort((a, b) => {
+                // Ensure FAB and Nav are on top
                 const score = (type: string) => {
-                    if (type === 'Container' || type === 'Column') return 0;
                     if (type === 'BottomNavigation') return 10;
                     if (type === 'FloatingActionButton') return 20;
-                    return 5;
+                    return 0;
                 };
                 return score(a.element.type) - score(b.element.type);
             });
-
             svg += sorted.map(renderNodeToSVG).join('\n');
         }
     }
@@ -205,58 +252,137 @@ function renderNodeToSVG(node: LayoutNode): string {
         }
     } else if (element.type === 'BottomNavigation') {
         const btmEl = element as any;
-        svg += `<g transform="translate(${x}, ${y})" filter="url(#shadow-8)">
-        <rect width="${width}" height="${height}" fill="${MD_COLORS.bottomNav}"/>`;
+        svg += `<g filter="url(#shadow-8)">
+        <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${MD_COLORS.bottomNav}"/>`;
 
-        const count = btmEl.items.length;
-        const itemWidth = width / count;
-        btmEl.items.forEach((item: any, i: number) => {
-            const ix = i * itemWidth;
-            const color = item.active ? MD_COLORS.primary : MD_COLORS.textSecondary;
-            // Icon mock (circle)
-            svg += `<circle cx="${ix + itemWidth / 2}" cy="20" r="10" fill="${color}" opacity="0.2"/>`;
-            // Label
-            svg += `<text x="${ix + itemWidth / 2}" y="44" text-anchor="middle" fill="${color}" font-family="'Roboto', sans-serif" font-size="12">${item.label}</text>`;
-        });
+        if (node.children) {
+            svg += node.children.map(renderNodeToSVG).join('\n');
+        }
+        // Fallback for old items property if needed...
         svg += `</g>`;
+
+    } else if (element.type === 'BottomNavigationItem') {
+        const itemEl = element as any;
+        const color = itemEl.active ? MD_COLORS.primary : MD_COLORS.textSecondary;
+        const cx = x + width / 2;
+        const cy = y + height / 2; // This height is calc'd as 72 in layout layout logic passed down
+
+        const iconPath = getIconPath(itemEl.icon);
+        if (iconPath) {
+            svg += `<g transform="translate(${cx - 12}, ${cy - 12})" fill="${color}"><path d="${iconPath}"/></g>`;
+        } else {
+            svg += `<circle cx="${cx}" cy="${cy - 8}" r="10" fill="${color}" opacity="0.2"/>`;
+        }
+        svg += `<text x="${cx}" y="${cy + 20}" text-anchor="middle" fill="${color}" font-family="'Roboto', sans-serif" font-size="12">${itemEl.label}</text>`;
 
     } else if (element.type === 'FloatingActionButton') {
         const fabEl = element as any;
+        const iconPath = getIconPath(fabEl.icon);
         svg += `<g transform="translate(${x}, ${y})" filter="url(#shadow-8)">
-         <circle cx="${width / 2}" cy="${height / 2}" r="${width / 2}" fill="${MD_COLORS.secondary}"/>
-         <text x="${width / 2}" y="${height / 2 + 6}" text-anchor="middle" fill="#000" font-family="'Roboto', sans-serif" font-size="24">${fabEl.icon || '+'}</text>
-      </g>`;
+         <circle cx="${width / 2}" cy="${height / 2}" r="${width / 2}" fill="${MD_COLORS.secondary}"/>`;
+        if (iconPath) {
+            svg += `<path transform="translate(${width / 2 - 12}, ${height / 2 - 12})" d="${iconPath}" fill="#000"/>`;
+        }
+        svg += `</g>`;
+
+    } else if (element.type === 'Icon') {
+        const iconEl = element as any;
+        const color = iconEl.color || MD_COLORS.textPrimary;
+        const path = getIconPath(iconEl.name);
+        if (path) {
+            svg += `<path transform="translate(${x}, ${y}) scale(${width / 24})" d="${path}" fill="${color}"/>`;
+        }
 
     } else if (element.type === 'Text') {
         const textEl = element as any;
         const fontSize = textEl.size || DEFAULT_FONT_SIZE;
-        const fontWeight = textEl.weight || 'normal';
         const fill = textEl.color || MD_COLORS.textPrimary;
-        const fontFamily = "'Roboto', 'Segoe UI', sans-serif";
-        svg += `<text x="${x}" y="${y + fontSize}" font-family="${fontFamily}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${fill}">${textEl.text}</text>`;
+        const weight = textEl.weight || 'normal';
+        svg += `<text x="${x}" y="${y + fontSize}" font-family="'Roboto', sans-serif" font-size="${fontSize}" font-weight="${weight}" fill="${fill}">${textEl.text}</text>`;
+
+    } else if (element.type === 'Link') {
+        const linkEl = element as any;
+        const fontSize = linkEl.size || DEFAULT_FONT_SIZE;
+        const fill = linkEl.color || MD_COLORS.link;
+        // Simple text with underline
+        svg += `<text x="${x}" y="${y + fontSize}" font-family="'Roboto', sans-serif" font-size="${fontSize}" fill="${fill}" text-decoration="underline" cursor="pointer">${linkEl.text}</text>`;
 
     } else if (element.type === 'Button') {
         const btnEl = element as any;
-        const isPrimary = btnEl.variant === 'primary' || !btnEl.variant;
-        const bgColor = isPrimary ? MD_COLORS.primary : MD_COLORS.surface;
-        const textColor = isPrimary ? MD_COLORS.onPrimary : MD_COLORS.primary;
-        const stroke = isPrimary ? 'none' : `stroke="${MD_COLORS.border}"`;
+        const variant = btnEl.variant || 'primary';
 
-        svg += `<g transform="translate(${x}, ${y})" ${isPrimary ? MD_SHADOWS.elevation2 : ''}>
-      <rect width="${width}" height="${height}" rx="4" fill="${bgColor}" ${stroke}/>
+        let bgColor = MD_COLORS.primary;
+        let textColor = MD_COLORS.onPrimary;
+        let stroke = 'none';
+
+        // Custom overrides
+        if (btnEl.backgroundColor) bgColor = btnEl.backgroundColor;
+
+        if (variant === 'secondary') {
+            bgColor = MD_COLORS.secondary;
+            textColor = '#000';
+        } else if (variant === 'outline') {
+            bgColor = 'transparent';
+            textColor = btnEl.textColor || MD_COLORS.primary;
+            stroke = btnEl.borderColor || MD_COLORS.border;
+            if (!btnEl.borderColor) stroke = MD_COLORS.textSecondary; // visible default
+        } else if (variant === 'ghost') {
+            bgColor = 'transparent';
+            textColor = btnEl.textColor || MD_COLORS.primary;
+        }
+
+        if (btnEl.textColor) textColor = btnEl.textColor; // specific override
+        if (btnEl.borderColor) stroke = btnEl.borderColor; // specific override
+
+        const radius = btnEl.radius !== undefined ? btnEl.radius : 4;
+
+        svg += `<g transform="translate(${x}, ${y})" style="cursor: pointer;">
+      <rect width="${width}" height="${height}" rx="${radius}" fill="${bgColor}" stroke="${stroke}" stroke-width="${stroke === 'none' ? 0 : 1}"/>
       <text x="${width / 2}" y="${height / 2 + 5}" text-anchor="middle" fill="${textColor}" font-family="'Roboto', sans-serif" font-size="14" font-weight="500" style="text-transform: uppercase; letter-spacing: 1.25px;">${btnEl.text}</text>
     </g>`;
 
     } else if (element.type === 'EditText' || element.type === 'Input') {
         const inputEl = element as any;
-        const borderColor = MD_COLORS.textSecondary;
-        const label = inputEl.label || inputEl.hint || inputEl.placeholder || '';
+        const borderColor = inputEl.borderColor || MD_COLORS.textSecondary;
+        const label = inputEl.label || '';
+        const value = inputEl.value || '';
+        const placeholder = inputEl.placeholder || inputEl.hint || '';
 
         svg += `<g transform="translate(${x}, ${y})">
-      <rect width="${width}" height="${height}" rx="4" fill="none" stroke="${borderColor}" stroke-width="1"/>
-      <text x="12" y="12" fill="${MD_COLORS.textSecondary}" font-family="'Roboto', sans-serif" font-size="12" style="background: white">${label ? ' ' + label + ' ' : ''}</text>
-       <text x="16" y="${height / 2 + 5}" fill="${MD_COLORS.textPrimary}" font-family="'Roboto', sans-serif" font-size="16">${inputEl.value || ''}</text>
-    </g>`;
+      <rect width="${width}" height="${height}" rx="4" fill="none" stroke="${borderColor}" stroke-width="1"/>`;
+
+        // Label (Top Left, Floating-like)
+        if (label) {
+            svg += `<text x="12" y="12" fill="${MD_COLORS.textSecondary}" font-family="'Roboto', sans-serif" font-size="12" style="background: white"> ${label} </text>`;
+        }
+
+        // Value or Placeholder
+        if (value) {
+            svg += `<text x="16" y="${height / 2 + 5}" fill="${MD_COLORS.textPrimary}" font-family="'Roboto', sans-serif" font-size="16">${value}</text>`;
+        } else if (placeholder) {
+            svg += `<text x="16" y="${height / 2 + 5}" fill="${MD_COLORS.textHint}" font-family="'Roboto', sans-serif" font-size="16">${placeholder}</text>`;
+        }
+
+        svg += `</g>`;
+
+    } else if (element.type === 'Image') {
+        const imgEl = element as any;
+        const radius = imgEl.radius || 0;
+        // Use a clipPath for rounded corners on image
+        const clipId = `clip-${Math.floor(Math.random() * 100000)}`;
+
+        // Placeholder if src is missing or simple render
+        // Using <image> tag. Note: Local file paths might not render in some viewers without base64. 
+        // Assuming for now simple href.
+
+        let imgTag = `<image href="${imgEl.src}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`;
+        if (!imgEl.src) {
+            // Placeholder rect
+            imgTag = `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#eee" rx="${radius}"/><text x="${x + width / 2}" y="${y + height / 2}" text-anchor="middle" fill="#aaa">Image</text>`;
+        } else {
+            svg += `<defs><clipPath id="${clipId}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" /></clipPath></defs>`;
+        }
+        svg += imgTag;
     }
 
     return svg;
@@ -266,11 +392,17 @@ export function render(config: ScreenConfig & { title?: string }, root: ViewBoxR
     const width = config.width || 800;
     const height = config.height || 600;
 
-    // Layout Pass
-    const rootLayout = calculateLayout(root, 0, 0, width, height);
+    // Safe Area Logic
+    let safeAreaTop = 0;
+    let safeAreaBottom = 0;
 
-    // Render Pass
-    const content = renderNodeToSVG(rootLayout);
+    if (config.size === 'Mobile') {
+        safeAreaTop = 24; // Status Bar
+        safeAreaBottom = 34; // Home Indicator Area
+    }
+
+    const availableHeight = height - safeAreaTop;
+    const rootLayout = calculateLayout(root, 0, 0, width, availableHeight, safeAreaBottom);
 
     const defs = `
     <defs>
@@ -292,27 +424,26 @@ export function render(config: ScreenConfig & { title?: string }, root: ViewBoxR
     </defs>
   `;
 
-    let statusBar = '';
-    let contentOffsetY = 0;
+    let overlays = '';
+    let homeIndicator = '';
 
     if (config.size === 'Mobile') {
-        contentOffsetY = 24;
-        statusBar = `<rect width="${width}" height="${contentOffsetY}" fill="#E0E0E0"/>
+        overlays += `<rect width="${width}" height="${safeAreaTop}" fill="#E0E0E0"/>
                    <text x="14" y="16" font-family="'Roboto', sans-serif" font-size="12" fill="#000">9:41</text>`;
-    }
 
-    // Clip contentOffsetY?? Scaffold handles its own layout from Y=0 usually. 
-    // But our scaffold assumes full height. 
-    // If Mobile, we shifted content down by 24. Scaffold should probably respect that or we just wrap it.
+        const homeIndicatorY = height - safeAreaBottom;
+        homeIndicator = `<rect x="${(width - 134) / 2}" y="${homeIndicatorY + 21}" width="134" height="5" rx="2.5" fill="#000000"/>`;
+    }
 
     return `
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
   ${defs}
   <rect width="${width}" height="${height}" fill="${MD_COLORS.background}"/>
-  ${statusBar}
-  <g transform="translate(0, ${contentOffsetY})">
-    ${content}
+  ${overlays}
+  <g transform="translate(0, ${safeAreaTop})">
+    ${renderNodeToSVG(rootLayout)}
   </g>
+  ${homeIndicator}
 </svg>
 `;
 }

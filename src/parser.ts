@@ -8,14 +8,15 @@ export const SCREEN_PRESETS: Record<string, { width: number; height: number }> =
     Custom: { width: 800, height: 600 },
 };
 
-export function parse(source: string): { config: ScreenConfig & { title?: string }, root: ViewBoxRoot['root'] } {
-    const doc = yaml.load(source) as ViewBoxRoot;
+export function parse(source: string): ViewBoxRoot {
+    const doc = yaml.load(source) as any;
 
     if (!doc || typeof doc !== 'object') {
         throw new Error('Invalid YAML: Root must be an object.');
     }
 
-    const screenType = doc.screen || 'Web';
+    // Support both 'size' and 'screen' for backward compatibility/ease of use
+    const screenType = doc.size || doc.screen || 'Web';
     let width = doc.width;
     let height = doc.height;
 

@@ -1,37 +1,66 @@
-screen: Mobile
-title: "App with Navigation"
+size: Mobile
+width: 375
+height: 812
+title: Feature Demo
 root:
   type: Scaffold
   appBar:
-    title: "My Dashboard"
-  bottomNavigation:
-    type: BottomNavigation
-    items:
-      - label: "Home"
-        active: true
-      - label: "Search"
-      - label: "Profile"
-  floatingActionButton:
-    type: FloatingActionButton
-    icon: "+"
+    title: Extended Profile
+    backButton: true
+    centerTitle: true
+    backgroundColor: '#3f51b5'
   body:
-    type: Container
+    type: VBox
     padding: 16
     gap: 16
     children:
-      - type: Text
-        text: "Recent Activity"
-        size: 20
-        weight: bold
+      - type: Image
+        src: 'https://via.placeholder.com/343x200'
+        width: 343
+        height: 200
+        radius: 12
+        margin: 16 # Margin logic not fully implemented but good to have in AST
       
-      - type: Container
-        color: "#F5F5F5"
-        height: 100
-        children:
-            - type: Text
-              text: "Card Content"
-              padding: 10
-
+      - type: Text
+        text: 'User Details'
+        size: 20
+        weight: 'bold'
+      
+      - type: EditText
+        label: 'Full Name'
+        value: 'Jane Doe'
+        borderColor: '#3f51b5'
+      
+      - type: EditText
+        label: 'Bio'
+        placeholder: 'Tell us about yourself'
+      
       - type: Button
-        text: "Refresh"
-        variant: secondary
+        text: 'Save Changes'
+        variant: 'primary'
+        backgroundColor: '#4caf50'
+        radius: 20
+        width: 343
+      
+      - type: Button
+        text: 'Cancel'
+        variant: 'outline'
+        borderColor: '#e53935'
+        textColor: '#e53935'
+        radius: 20
+        width: 343
+
+      - type: Link
+        text: 'View Terms of Service'
+        url: '#'
+        size: 14
+        
+  bottomNavigation:
+    children:
+      - type: BottomNavigationItem
+        label: Home
+        icon: home
+        active: true
+      - type: BottomNavigationItem
+        label: Profile
+        icon: person

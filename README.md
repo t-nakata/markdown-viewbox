@@ -8,24 +8,54 @@ Material Design に準拠したワイヤーフレームを素早く生成しま�
 - **3つの画面サイズ**: Web, Mobile, Custom。
 - **Material Design**: デフォルトで見栄えの良いコンポーネント。
 
-## 使い方
+## ドキュメント
+
+### 記法・基本
+- [ViewBox 記法 (Syntax)](docs/Syntax.md)
+
+### コンポーネントリファレンス
+コンポーネントごとの詳細ドキュメントです。
+
+- **構造 (Structure)**
+  - [Scaffold](docs/components/Scaffold.md) (画面構造、AppBar、BottomNav)
+  - [Container / Layout](docs/components/Layout.md) (レイアウト、余白)
+
+- **入力・操作 (Inputs & Actions)**
+  - [Button](docs/components/Button.md) (ボタン、カスタムスタイル)
+  - [EditText](docs/components/EditText.md) (入力フォーム、ラベル)
+  - [Link](docs/components/Link.md) (リンクテキスト)
+
+- **メディア・表示 (Media & Display)**
+  - [Text](docs/components/Text.md) (テキスト)
+  - [Image](docs/components/Image.md) (画像、角丸)
+  - [Icon](docs/components/Icon.md) (アイコン)
+
+- **ナビゲーション (Navigation)**
+  - [Navigation Components](docs/components/Navigation.md) (BottomNavigation, FAB)
+
+## クイックスタート
 
 1. YAMLファイルを作成します (例: `design.yaml`)
    ```yaml
-   screen: Mobile
+   size: Mobile
    root:
      type: Scaffold
      appBar:
        title: "My App"
+       centerTitle: true
      body:
        type: Container
-       padding: 16
-       gap: 16
+       padding: 20
        children:
          - type: Text
-           text: "Hello World"
+           text: "Hello ViewBox"
+           size: 24
+         - type: Image
+           height: 150
+           radius: 10
          - type: Button
-           text: "Action"
+           text: "Get Started"
+           variant: "primary"
    ```
 
 2. 変換を実行します
@@ -34,32 +64,6 @@ Material Design に準拠したワイヤーフレームを素早く生成しま�
    ```
 
 3. `design.svg` が生成されます。
-
-## コンポーネント一覧
-
-Material Design (Flutter/Android風) の命名規則を採用しています。
-
-### 構造
-- **Scaffold**: 画面の基本構造。
-  - `appBar`: `{ title: string }`
-  - `body`: メインコンテンツ
-- **Container**: 多目的なコンテナ（レイアウト、余白、背景）。旧 `Box`/`VBox`。
-  - `gap`: 子要素の間隔
-  - `padding`: パディング
-  - `color`: 背景色
-  - `children`: 子要素リスト
-
-### UI要素
-- **Text**: テキスト。
-  - `text`: 文字列
-  - `size`: サイズ
-  - `color`: 色
-- **Button**: ボタン。
-  - `text`: ラベル
-  - `variant`: `primary` | `secondary`
-- **EditText**: 入力フォーム。
-  - `label`: ラベル
-  - `hint`: ヒントテキスト
 
 ## ライセンス
 ISC
